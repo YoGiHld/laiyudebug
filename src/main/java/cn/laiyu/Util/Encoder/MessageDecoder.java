@@ -3,9 +3,7 @@ package cn.laiyu.Util.Encoder;
 import cn.laiyu.Message.BaseMessage;
 import cn.laiyu.Message.Message;
 
-import cn.laiyu.Message.RequestMessage.BeginVoteMessage;
-import cn.laiyu.Message.RequestMessage.JoinGameMessage;
-import cn.laiyu.Message.RequestMessage.RestGameMessage;
+import cn.laiyu.Message.RequestMessage.*;
 import com.alibaba.fastjson.JSON;
 
 import javax.websocket.DecodeException;
@@ -33,10 +31,23 @@ public class MessageDecoder implements Decoder.Text<BaseMessage> {
                 baseMessage=new RestGameMessage();
                 break;
             case "113" :
-                baseMessage=new BeginVoteMessage();
+                baseMessage=new BeginCamiagnMessage();
+                break;
+            case "114" :
+                baseMessage=new JoinCamiagnMessage();
+                break;
+            case "115" :
+                baseMessage=new ExitCamiagnMessage();
+                break;
+            case "116" :
+                baseMessage=new CampiagnVoteMessage();
+                break;
+            case "117" :
+                baseMessage=new BeginCamiagnVoteMessage();
                 break;
         }
         baseMessage= JSON.parseObject(s,baseMessage.getClass());
+
         return baseMessage;
     }
 

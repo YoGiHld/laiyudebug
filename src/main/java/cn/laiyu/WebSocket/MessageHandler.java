@@ -1,18 +1,19 @@
 package cn.laiyu.WebSocket;
 
 import cn.laiyu.Message.BaseMessage;
-import cn.laiyu.Message.Message;
 
-import cn.laiyu.Message.ReponseMessage.ResponseCampiagnMessage;
+import cn.laiyu.Message.ReponseMessage.CampiagnListResponseMessage;
+import cn.laiyu.Message.ReponseMessage.CampiagnResponseMessage;
+
 import cn.laiyu.Message.RequestMessage.*;
 import cn.laiyu.PoJo.Room.Room;
-import cn.laiyu.PoJo.Vote.VoteSubject;
-import com.alibaba.fastjson.JSON;
+import cn.laiyu.PoJo.User.Vote;
+import cn.laiyu.PoJo.Vote.VoteObserver;
+import cn.laiyu.Util.TimeQuiz.CampiagnVoteQuiz;
+import cn.laiyu.Util.TimeQuiz.VoteTimeQuiz;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import static cn.laiyu.WebSocket.RoomWebSocket.GameBroadCast;
 import static cn.laiyu.WebSocket.RoomWebSocket.getHomeStructure;
@@ -35,29 +36,74 @@ public class MessageHandler {
                 MessageHandle((RestGameMessage)message,room);
                 break;
             case "113" :
-                MessageHandle((BeginVoteMessage)message,room);
+                MessageHandle((BeginCamiagnMessage)message,room);
+                break;
             case "114" :
-                MessageHandle((JoinVoteMessage)message,room);
+                MessageHandle((JoinCamiagnMessage)message,room);
+                break;
+            case "115" :
+                MessageHandle((ExitCamiagnMessage)message,room);
+                break;
+            case "116" :
+                MessageHandle((CampiagnVoteMessage)message,room);
+                break;
+            case "117" :
+                MessageHandle((BeginCamiagnVoteMessage)message,room);
+                break;
         }
     }
-    public static void MessageHandle(BeginVoteMessage message, Room room) throws IOException, InterruptedException {
+
+    public static void MessageHandle(BeginCamiagnVoteMessage message,Room room) throws IOException {
+        BaseMessage baseMessage=new BaseMessage();
+        baseMessage.statusCode="106";
+        GameBroadCast(room,JSONObject.toJSONString(baseMessage));
+        CampiagnVoteQuiz campiagnVoteQuiz=new CampiagnVoteQuiz(5,room);
+        Thread thread=new Thread(campiagnVoteQuiz);
+        thread.start();
+    }
+
+    public static void MessageHandle(CampiagnVoteMessage message, Room room){
+        VoteObserver voter=new VoteObserver();
+        System.out.println(message.getTargetId()+"   ____"+message.getSeatId());
+        voter.tagetSeatId=message.getTargetId();
+        voter.mySeatId=message.getSeatId();
+        System.out.println( voter.tagetSeatId);
+        room.voteSubject.addObservers(voter);
+    }
+
+
+    public static void MessageHandle(ExitCamiagnMessage message,Room room) throws IOException {
+        room.voteSubject.eixtCampaignObservers(message.seatId);
+        CampiagnListResponseMessage camListResMes=new CampiagnListResponseMessage();
+        camListResMes.campiagnList=room.voteSubject.getCampaignObservers();
+        camListResMes.statusCode="104";
+        GameBroadCast(room,JSONObject.toJSONString(camListResMes));
+    }
+
+
+    public static void MessageHandle(BeginCamiagnMessage message, Room room) throws IOException, InterruptedException {
         int limitSec=5;
         //开启竞选模式
-
-        GameBroadCast(room,JSONObject.toJSONString(message));
-        while(limitSec > 0){
-               --limitSec;
-                System.out.println("remain sceconds:"+limitSec);
-                TimeUnit.SECONDS.sleep(1);
-        }
-        ResponseCampiagnMessage responseC=new ResponseCampiagnMessage();
+        CampiagnResponseMessage responseC=new CampiagnResponseMessage();
         responseC.statusCode="103";
         responseC.windowStant="1";
+        responseC.isCampiagnProcess="1";
         GameBroadCast(room,JSONObject.toJSONString(responseC));
+        responseC.isCampiagnProcess="0";
+        String resMessage=JSONObject.toJSONString(responseC);
+        VoteTimeQuiz timeQuiz=new VoteTimeQuiz(15,resMessage,room);
+        Thread thread=new Thread(timeQuiz);
+        thread.start();
     }
 
-    public static void MessageHandle(JoinVoteMessage message, Room room){
+
+    public static void MessageHandle(JoinCamiagnMessage message, Room room) throws IOException {
+        System.out.println("seatid_____________"+message.seatId);
         room.voteSubject.addCampaignObservers(message.seatId);
+        CampiagnListResponseMessage camListResMes=new CampiagnListResponseMessage();
+        camListResMes.campiagnList=room.voteSubject.getCampaignObservers();
+        camListResMes.statusCode="104";
+        GameBroadCast(room,JSONObject.toJSONString(camListResMes));
     }
 
     private static void calculateVoteResult( ) {

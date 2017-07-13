@@ -15,7 +15,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by humac on 2017/6/26.
  */
 public class Room {
-    public VoteSubject voteSubject;
+    public Integer campiagnSeatId;
+
+    public VoteSubject voteSubject =new VoteSubject();
 
     private User homeOwner;
 
@@ -99,7 +101,7 @@ public class Room {
             Iterator<Map.Entry<Integer, SeatState>> it = this.playSet.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Integer, SeatState> entry = (Map.Entry) it.next();
-                if (entry.getValue().equals(user)) {
+                if (entry.getValue().playUser.equals(user)) {
                     this.playSet.remove(entry.getKey(), entry.getValue());
                     flag = 1;
                     break;

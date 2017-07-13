@@ -1,24 +1,43 @@
 package cn.laiyu.Util.TimeQuiz;
 
-import cn.laiyu.Message.RequestMessage.VoteMessage;
 import cn.laiyu.PoJo.Room.Room;
 
-import java.util.Map;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import static cn.laiyu.WebSocket.RoomWebSocket.GameBroadCast;
 
 /**
  * Created by humac on 2017/7/6.
  */
-public class VoteTimeQuiz {
-    private int limitSec=11;
+public class VoteTimeQuiz implements Runnable{
+    private int limitSec;
 
-    public static void TimeQuiz(int limitSec) throws InterruptedException{
-        int sec=limitSec;
-        while(sec>0){
-            --sec;
-            TimeUnit.SECONDS.sleep(1);
-        }
+    private  Room room;
+    private String message;
+    public VoteTimeQuiz(int second,String message,Room room){
+        limitSec=second;
+        this.message=message;
+        this.room=room;
     }
+    @Override
+    public void run( ) {
+        while(limitSec > 0){
+            --limitSec;
+            System.out.println("remain sceconds:"+limitSec);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-    public void processVoteResult(Room room){}
+        try {
+            GameBroadCast(room, message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 }

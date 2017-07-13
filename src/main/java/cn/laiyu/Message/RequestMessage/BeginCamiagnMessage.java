@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by humac on 2017/7/6.
  */
-public class BeginVoteMessage extends BaseMessage {
+public class BeginCamiagnMessage extends BaseMessage {
     //0为非敬上竞选环节，1为警上环节
     public String windowStant;
 

@@ -5,24 +5,20 @@ import cn.laiyu.PoJo.User.Vote;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by humac on 2017/7/10.
  */
 public class VoteSubject implements VoteThreame {
-    private List<Integer> campaignObservers=new ArrayList<Integer>();
+    private List<Integer> campaignObservers=new CopyOnWriteArrayList<Integer>();
 
-    private List<IObserver> voteObservers=new ArrayList<IObserver>();
-
-    private Room myRoom;
-
-    public VoteSubject(Room room){
-        this.myRoom=room;
-    }
+    private List<IObserver> voteObservers=new CopyOnWriteArrayList<IObserver>();
 
     @Override
     public void addObservers(IObserver observer) {
-
+        System.out.println(((VoteObserver)observer).mySeatId);
+        this.voteObservers.add(observer);
     }
 
     @Override
@@ -38,5 +34,23 @@ public class VoteSubject implements VoteThreame {
     @Override
     public void addCampaignObservers(Integer seatId) {
         this.campaignObservers.add(seatId);
+    }
+
+    public void eixtCampaignObservers(Integer seatId){ this.campaignObservers.remove(seatId);}
+
+    public List<Integer> getCampaignObservers( ) {
+        return campaignObservers;
+    }
+
+    public void setCampaignObservers(List<Integer> campaignObservers) {
+        this.campaignObservers = campaignObservers;
+    }
+
+    public List<IObserver> getVoteObservers( ) {
+        return voteObservers;
+    }
+
+    public void setVoteObservers(List<IObserver> voteObservers) {
+        this.voteObservers = voteObservers;
     }
 }
